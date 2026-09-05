@@ -72,7 +72,12 @@ Open ``sync_pairs.conf`` and configure your directories using the following pipe
   - ``LOCAL_PATH``: Absolute path to the folder on your local machine.
   - ``REMOTE_PATH``: Destination path within your Filen cloud storage.
   - ``IGNORE_FILE``: Path to a custom ignore file (relative to the script directory). Leave blank or omit if not needed.
-  - ``SYNC_MODE``: Synchronization mode (e.g., localToCloud). Defaults to localToCloud if left blank.
+  - ``SYNC_MODE``: Synchronization mode determining the direction of the transfer. Valid options include:
+    - `twoWay`: Mirrors changes in both directions between local and cloud storage.
+    - `localToCloud`: Uploads files from local storage to the remote cloud (default if left blank).
+    - `cloudToLocal`: Downloads files from the remote cloud to local storage.
+    - `localBackup`: Uploads files to the cloud without deleting cloud files on local deletions.
+    - `cloudBackup`: Downloads files locally without deleting local files on cloud deletions.
 
 2. Setting Ignore Rules
 Place any ignore files inside the ``ignores/`` directory (matching what you define in ``sync_pairs.conf``, e.g., ``ignores/media.filenignore``). Each line represents a pattern to exclude:
