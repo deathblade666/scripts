@@ -83,11 +83,57 @@ fi
 
 cron_configured=false
 setup_cronjob() {
-  echo "Setting up automated daily cron job..."
-  CRON_JOB="0 2 * * * /bin/bash $(pwd)/backup.sh"
-  (crontab -l 2>/dev/null | grep -Fv "backup.sh"; echo "$CRON_JOB") | crontab -
+  echo "--- Cron Schedule Configuration ---"
+  echo "Select how often you want the backup to run:"
+  echo "  1) Daily at 2:00 AM (Default)"
+  echo "  2) Every 12 hours (Midnight and Noon)"
+  echo "  3) Every hour"
+  echo "  4) Custom cron expression"
+  read -p "Enter your choice [1-4] (default 1): " cron_choice
+
+  case "$cron_choice" in
+    2) CRON_SCHEDULE="0 */12 * * *" ;;
+    3) CRON_SCHEDULE="0 * * * *" ;;
+    4)
+      while true; do
+        read -p "Enter custom cron expression (e.g., '0 */6 * * *'): " CRON_SCHEDULE
+        if [ -z "$CRON_SCHEDULE" ]; then
+          echo "Empty expression provided. Falling back to daily at 2:00 AM."
+          CRON_SCHEDULE="0 2 * * *"
+          break
+        fi
+        
+        # Test-drive the expression using crontab's native validation
+        TEST_JOB="$CRON_SCHEDULE /bin/bash $(pwd)/backup.sh"
+        if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
+          validation_test=$( (crontab -u "$REAL_USER" -l 2>/dev/null; echo "$TEST_JOB") | crontab -u "$REAL_USER" - 2>&1 >/dev/null )
+        else
+          validation_test=$( (crontab -l 2>/dev/null; echo "$TEST_JOB") | crontab - 2>&1 >/dev/null )
+        fi
+
+        if [ $? -eq 0 ]; then
+          break # Valid! Exit the loop.
+        else
+          echo "[ERROR] Invalid cron expression rejected by system crontab:"
+          echo "        $validation_test"
+          echo "Please try again."
+        fi
+      done
+      ;;
+    1 | *) CRON_SCHEDULE="0 2 * * *" ;;
+  esac
+
+  echo "Setting up automated cron job ($CRON_SCHEDULE)..."
+  CRON_JOB="$CRON_SCHEDULE /bin/bash $(pwd)/backup.sh"
+  
+  if [ "$EUID" -eq 0 ] && [ -n "$SUDO_USER" ]; then
+    (crontab -u "$REAL_USER" -l 2>/dev/null | grep -Fv "backup.sh"; echo "$CRON_JOB") | crontab -u "$REAL_USER" -
+  else
+    (crontab -l 2>/dev/null | grep -Fv "backup.sh"; echo "$CRON_JOB") | crontab -
+  fi
+  
   cron_configured=true
-  echo "Cron job configured to run daily at 2:00 AM."
+  echo "Cron job successfully configured for user '$REAL_USER'."
 }
 
 dry_run_executed=false
