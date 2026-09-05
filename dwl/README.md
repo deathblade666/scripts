@@ -1,6 +1,8 @@
 # dwl Update Staging Workflow Script
 
-A Bash automation script designed to safely stage, patch, configure, and compile updates for **dwl** (a Wayland compositor based on wlroots). It clones upstream sources, targets versioned Arch Linux wlroots slots, carries over custom configurations, applies patches automatically, and performs a dry-run build check.
+A Bash automation script designed to safely stage, patch, configure for **dwl** (a Wayland compositor based on wlroots). It clones upstream sources, targets versioned Arch Linux wlroots slots, carries over custom configurations, applies patches automatically, and performs a dry-run build check. 
+
+**This script does NOT compile dwl that still needs to be done manually**
 
 ---
 
