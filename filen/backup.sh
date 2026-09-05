@@ -32,13 +32,14 @@ echo "[" > "$JSON_FILE"
 FIRST=true
 LOCAL_PATHS=()
 
-while IFS='|' read -r local_path remote_path ignore_file sync_mode <&3; do
+while IFS='|' read -r local_path remote_path ignore_file sync_mode exclude_dots <&3; do
     [[ "$local_path" =~ ^#.*$ ]] || [[ -z "$local_path" ]] && continue
 
     local_path=$(echo "$local_path" | xargs)
     remote_path=$(echo "$remote_path" | xargs)
     ignore_file=$(echo "$ignore_file" | xargs)
     sync_mode=$(echo "$sync_mode" | xargs)
+    exclude_dots=$(echo "$exclude_dots" | xargs)
 
     # Keep track of local paths for cleanup later
     LOCAL_PATHS+=("$local_path")
@@ -49,13 +50,20 @@ while IFS='|' read -r local_path remote_path ignore_file sync_mode <&3; do
         IGNORE_JSON=$(jq -Rn '[inputs | select(length > 0 and test("^#") | not)]' "$ignore_file" 2>/dev/null || echo "[]")
     fi
 
+    # Determine excludeDotFiles boolean (defaults to true if empty or invalid)
+    EXCLUDE_DOTS_BOOL=true
+    if [[ "$exclude_dots" =~ ^(false|0|no)$ ]]; then
+        EXCLUDE_DOTS_BOOL=false
+    fi
+
     # Construct the JSON object for this pair (defaults to localToCloud if sync_mode is empty)
     PAIR_JSON=$(jq -n \
         --arg loc "$local_path" \
         --arg rem "$remote_path" \
         --argjson ign "$IGNORE_JSON" \
         --arg mode "${sync_mode:-localToCloud}" \
-        '{local: $loc, remote: $rem, syncMode: $mode, ignore: $ign}')
+        --argjson exDots "$EXCLUDE_DOTS_BOOL" \
+        '{local: $loc, remote: $rem, syncMode: $mode, ignore: $ign, excludeDotFiles: $exDots}')
 
     if [ "$FIRST" = true ]; then
         FIRST=false
@@ -120,4 +128,3 @@ EOF
 
     curl -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK_URL" >/dev/null 2>&1
 fi
-

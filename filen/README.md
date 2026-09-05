@@ -65,8 +65,8 @@ The bootstrap script will:
 Open ``sync_pairs.conf`` and configure your directories using the following pipe-delimited format:
 
 ```text
-# Format: LOCAL_PATH | REMOTE_PATH | IGNORE_FILE | SYNC_MODE
-/srv/samba/media | /Backup/Media | ignores/media.filenignore | localToCloud
+# Format: LOCAL_PATH | REMOTE_PATH | IGNORE_FILE | SYNC_MODE | EXCLUDE_DOTS
+/srv/samba/media | /Backup/Media | ignores/media.filenignore | localToCloud | true
 ```
 
   - ``LOCAL_PATH``: Absolute path to the folder on your local machine.
@@ -78,6 +78,7 @@ Open ``sync_pairs.conf`` and configure your directories using the following pipe
     - `cloudToLocal`: Downloads files from the remote cloud to local storage.
     - `localBackup`: Uploads files to the cloud without deleting cloud files on local deletions.
     - `cloudBackup`: Downloads files locally without deleting local files on cloud deletions.
+  - ``EXCLUDE_DOTS``: Boolean setting (true or false) to control dotfile handling. Set to false if you want to include hidden files starting with a dot, or true/leave blank to exclude them.
 
 2. Setting Ignore Rules
 Place any ignore files inside the ``ignores/`` directory (matching what you define in ``sync_pairs.conf``, e.g., ``ignores/media.filenignore``). Each line represents a pattern to exclude:
