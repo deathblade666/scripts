@@ -3,7 +3,7 @@ cd "$(dirname "$0")"
 export FILEN_CLI_DATA_DIR="$(pwd)/data"
 
 # --- CONFIGURATION ---
-DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1545280465928454244/iknnk2kkKlV2JD3V5HLy1FEY3xYGvCwDg6InJzVpFB-CelYPgdLIj8B5JlD688xtPRDD"
+DISCORD_WEBHOOK_URL=""
 # ---------------------
 
 DRY_RUN=false
