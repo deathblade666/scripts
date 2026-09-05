@@ -28,14 +28,14 @@ Ensure the following standard utilities are available on your system (usually in
 
 ## Installation & Usage
 
-1. Save your main script (e.g., `setup-nas.sh`).
+1. Save the script
 2. Make the script executable:
 ```
-chmod +x setup-nas.sh
+chmod +x systemd-mounting-service.sh
 ```
 3. Run the script:
 ```
-./setup-nas.sh
+./systemd-mounting-service.sh
 ```
 4. Select option **1** to create and configure the mounting service. You will be prompted for:
    - CIFS Username
@@ -45,9 +45,9 @@ chmod +x setup-nas.sh
 
 ---
 
-## Manual Configuration (Without Prompts)
+## Manual Configuration
 
-If you prefer not to use the interactive wizard, you can set up the configuration files manually. 
+If you prefer not to use the interactive wizard, you can set up the configuration files manually before running the script. 
 
 ### 1. Create the Config Directory
 ```
@@ -60,8 +60,7 @@ Create a file named `~/.config/nas-mount/.smbcreds` containing your SMB user cre
 username=your_username
 password=your_password
 ```
-```
-*Crucial:* Set strict file permissions so other users cannot read your password:
+**Crucial:** Set strict file permissions so other users cannot read your password:
 ```
 chmod 600 ~/.config/nas-mount/.smbcreds
 ```
