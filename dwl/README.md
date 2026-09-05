@@ -12,20 +12,6 @@ A Bash automation script designed to safely stage, patch, configure, and compile
 - **Batch Patching:** Iterates through a dedicated patch directory and applies version-compatible `.patch` files using standard Unix `patch`, halting safely if any patch conflicts.
 - **Dry-Run Compilation:** Compiles the staged build immediately to guarantee that everything builds cleanly before you decide to deploy.
 
----
-
-## Prerequisites
-
-Ensure the following tools and libraries are installed on your system:
-- Bash (v4+)
-- `git`
-- `make`
-- `gcc` or a compatible C compiler
-- `patch` (GNU patch utility)
-- Versioned `wlroots` development packages (e.g., `wlroots0.18` and its corresponding pkg-config files)
-
----
-
 ## Configuration Variables
 
 At the top of the script, you can adjust the following variables to match your directory layout and version requirements:
@@ -39,31 +25,12 @@ At the top of the script, you can adjust the following variables to match your d
 
 ## Installation & Usage
 
-1. Save the script to a file (e.g., `stage-dwl.sh`).
+1. Save the script to a file.
 2. Make the script executable:
 ```
-chmod +x stage-dwl.sh
+chmod +x update-dwl.sh
 ```
 3. Run the script:
 ```
-./stage-dwl.sh
-```
-
----
-
-## Manual Directory Setup (Optional)
-
-If you prefer to configure your environment structure manually before running the script, ensure your paths match the script's expectations:
-```
-mkdir -p ~/Developement/dwl/current
-mkdir -p ~/Developement/dwl/dwl-patches
-```
-
----
-
-## Deploying After a Successful Build
-
-If the script compiles the staging environment cleanly, you can deploy the new build permanently by executing:
-```
-cd ~/Developement/dwl/dwl-staging-main && sudo make install
+./update-dwl.sh
 ```
