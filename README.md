@@ -8,7 +8,7 @@ To keep things clean and organized, every script lives in its own dedicated, sel
 
 ## What's Inside
 
-Since this is a catch-all repository for scripts I write, the tools inside handle a variety of personal use cases, including:
+This is a catch-all repository for scripts I write, the tools inside handle a variety of personal use cases, including:
 
 - Automating network share mounts (CIFS/SMB) using systemd user services.
 - Staging, patching, and compiling updates for the `dwl` window manager.
