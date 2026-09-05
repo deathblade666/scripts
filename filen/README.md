@@ -19,7 +19,7 @@ An automated, configuration-driven backup script for [Filen Cloud](https://filen
 ## File Structure
 
 ```text
-├── setup.sh            # Initial installation and configuration script
+├── bootstrap.sh            # Initial installation and configuration script
 ├── backup.sh           # Core backup synchronization engine
 ├── sync_pairs.conf     # Configuration file for your sync folders
 ├── ignores/            # Directory containing custom ignore pattern files
@@ -36,11 +36,11 @@ Ensure the following tools are installed on your system before running the scrip
 
 ## Install & Setup
 
-1. Place ``bootstrap.sh`` and ``backup.sh`` into your chosen working directory (e.g., /opt/filencli).
+1. Place ``bootstrap.sh`` and ``backup.sh`` into your chosen working directory.
 2. Make both scripts executable:
 
 ```bash
-chmod +x setup.sh backup.sh
+chmod +x bootstrap.sh backup.sh
 ```
 3. Run the booststrap:
 
@@ -50,7 +50,7 @@ chmod +x setup.sh backup.sh
 
 (Note: If you run the script with sudo, it will automatically detect your user account and ensure all local configuration and data files remain owned by you rather than root).
 
-The setup script will:
+The bootstrap script will:
 
   - Install or update the Filen CLI.
   - Prompt you for your Filen credentials and 2FA recovery key (if enabled).
