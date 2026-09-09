@@ -14,14 +14,7 @@ for arg in "$@"; do
     fi
 done
 
-if [ "$DRY_RUN" = false ]; then
-    if [ ! -d "$FILEN_CLI_DATA_DIR" ] || [ -z "$(ls -A "$FILEN_CLI_DATA_DIR" 2>/dev/null)" ]; then
-        echo "No Filen credentials detected in the local data directory."
-        echo "Please log in to link your account:"
-        filen login
-        echo ""
-    fi
-else
+if [ "$DRY_RUN" = true ]; then
     echo "--- RUNNING IN DRY RUN MODE ---"
 fi
 
@@ -79,7 +72,7 @@ if [ "$DRY_RUN" = true ]; then
     echo "--- DRY RUN: Generated syncPairs.json Content ---"
     cat "$JSON_FILE"
     echo "--------------------------------------------------"
-    echo "Would execute: filen sync --skip-update"
+    echo "Would execute: /usr/local/bin/filen sync --skip-update"
     echo "--- DRY RUN COMPLETE ---"
     exit 0
 fi
@@ -88,7 +81,7 @@ fi
 echo "[$(date)] Starting Filen sync"
 HAS_ERROR=false
 
-if ! filen sync --skip-update < /dev/null; then
+if ! /usr/local/bin/filen sync --skip-update < /dev/null; then
     echo "[ERROR] Filen sync encountered an error."
     HAS_ERROR=true
 fi
