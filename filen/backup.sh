@@ -77,12 +77,17 @@ if [ "$DRY_RUN" = true ]; then
     exit 0
 fi
 
-# Execute the central registry sync
+# Execute the central registry sync and capture output/exit code
 echo "[$(date)] Starting Filen sync"
 HAS_ERROR=false
+SYNC_OUTPUT=""
+SYNC_EXIT_CODE=0
 
-if ! /usr/local/bin/filen sync --skip-update < /dev/null; then
-    echo "[ERROR] Filen sync encountered an error."
+SYNC_OUTPUT=$(/usr/local/bin/filen sync --skip-update < /dev/null 2>&1)
+SYNC_EXIT_CODE=$?
+
+if [ $SYNC_EXIT_CODE -ne 0 ]; then
+    echo "[ERROR] Filen sync encountered an error (Exit code: $SYNC_EXIT_CODE)."
     HAS_ERROR=true
 fi
 
@@ -93,30 +98,58 @@ done
 
 # Send Discord Webhook Notification
 if [ -n "$DISCORD_WEBHOOK_URL" ] && [ "$DISCORD_WEBHOOK_URL" != "YOUR_WEBHOOK_URL_HERE" ]; then
+    TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
     if [ "$HAS_ERROR" = true ]; then
-        payload=$(cat <<EOF
-{
-  "embeds": [{
-    "title": "❌ Filen Sync Failed",
-    "description": "One or more sync pairs encountered an error during execution.",
-    "color": 15158332,
-    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  }]
-}
-EOF
-)
+        if [ ${#SYNC_OUTPUT} -gt 1000 ]; then
+            SYNC_OUTPUT="${SYNC_OUTPUT:0:1000}..."
+        fi
+
+        payload=$(jq -n \
+            --arg title "❌ Filen Sync Failed" \
+            --arg desc "One or more sync pairs encountered an error during execution. (Exit Code: $SYNC_EXIT_CODE)" \
+            --arg output "$SYNC_OUTPUT" \
+            --arg ts "$TIMESTAMP" \
+            '{
+              embeds: [{
+                title: $title,
+                description: $desc,
+                color: 15158332,
+                fields: [
+                  {
+                    name: "Error Output",
+                    value: ("```\n" + ($output // "No output captured") + "\n```")
+                  }
+                ],
+                timestamp: $ts
+              }]
+            }')
     else
-        payload=$(cat <<EOF
-{
-  "embeds": [{
-    "title": "✅ Filen Sync Successful",
-    "description": "All sync pairs processed successfully.",
-    "color": 3066993,
-    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  }]
-}
-EOF
-)
+        # Build an array of paths for jq to format properly
+        # Pass the bash array into a JSON array using jq -R and --slurpfile, or map them dynamically
+        SYNCED_ARRAY=$(printf '%s\n' "${LOCAL_PATHS[@]}" | jq -R . | jq -s .)
+
+        payload=$(jq -n \
+            --arg title "✅ Filen Sync Successful" \
+            --arg desc "All sync pairs processed successfully." \
+            --argjson paths "$SYNCED_ARRAY" \
+            --arg ts "$TIMESTAMP" \
+            '
+            ($paths // [] | map("- `" + . + "`") | join("\n")) as $list
+            | {
+              embeds: [{
+                title: $title,
+                description: $desc,
+                color: 3066993,
+                fields: [
+                  {
+                    name: "Synced Local Paths",
+                    value: ($list | if . == "" then "No paths found" else . end)
+                  }
+                ],
+                timestamp: $ts
+              }]
+            }' )
     fi
 
     curl -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK_URL" >/dev/null 2>&1
